@@ -87,7 +87,7 @@ In particular, in this walkthrough you will create an endpoint to your microserv
 Now you need to choose a path for your endpoint and to connect this endpoint to your microservice. Give to your endpoint the following path: **/fastapi-greetings**. Then, specify that you want to connect your endpoint to a microservice and, finally, select *python-hello-fastapi*.  
 Step 3 of [Microservice from template - Get started](https://docs.mia-platform.eu/development_suite/api-console/api-design/custom_microservice_get_started/#3-creating-the-endpoint) section of Mia-Platform documentation will explain in detail how to create an endpoint from the DevOps Console.
 
-###Save your changes
+### Save your changes
 
 After having created an endpoint to your microservice you should save the changes that you have done to your project in the DevOps console.  
 Remember to choose a meaningful title for your commit (e.g 'created service python_hello_fastapi'). After some seconds you will be prompted with a popup message which confirms that you have successfully saved all your changes.  
