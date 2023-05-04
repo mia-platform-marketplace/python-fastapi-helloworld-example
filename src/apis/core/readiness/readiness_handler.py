@@ -12,7 +12,7 @@ router = APIRouter()
     status_code=status.HTTP_200_OK,
     tags=["Readiness"]
 )
-def readiness():
+async def readiness():
     """
     This route can be used as a readinessProbe for Kubernetes. By default, the
     route will always response with an OK status and the 200 HTTP code as soon
