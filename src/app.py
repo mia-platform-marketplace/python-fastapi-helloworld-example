@@ -1,3 +1,4 @@
+import os
 import uvicorn
 from fastapi import FastAPI
 from dotenv import load_dotenv
@@ -26,4 +27,8 @@ app.include_router(hello_world_handler.router)
 
 
 if __name__ == '__main__':
-    uvicorn.run(app, host="0.0.0.0", port=3000)
+    uvicorn.run(
+        app,
+        host='0.0.0.0',
+        port=os.environ.get('HTTP_PORT', 300)
+    )
