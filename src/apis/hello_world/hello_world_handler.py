@@ -12,7 +12,7 @@ router = APIRouter()
     status_code=status.HTTP_200_OK,
     tags=["Hello World"]
 )
-def hello_world():
+async def hello_world():
     """
     Say Hello
     """

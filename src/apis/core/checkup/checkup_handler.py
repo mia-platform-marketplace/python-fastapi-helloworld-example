@@ -12,7 +12,7 @@ router = APIRouter()
     status_code=status.HTTP_200_OK,
     tags=["Check-up"]
 )
-def readiness():
+async def readiness():
     """
     This route can be used as check-up route, to verify if all the
     functionalities of the service are available or not. The purpose of this

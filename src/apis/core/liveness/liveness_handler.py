@@ -12,7 +12,7 @@ router = APIRouter()
     status_code=status.HTTP_200_OK,
     tags=["Liveness"]
 )
-def liveness():
+async def liveness():
     """
     This route can be used as a probe for load balancers, status dashboards and
     as a helthinessProbe for Kubernetes. By default, the route will always
