@@ -1,4 +1,4 @@
-from fastapi import APIRouter, status
+from fastapi import APIRouter, Request, status
 
 from src.apis.schemas.message_schema import MessageResponse
 
@@ -12,9 +12,12 @@ router = APIRouter()
     status_code=status.HTTP_200_OK,
     tags=["Hello World"]
 )
-async def hello_world():
+async def hello_world(request: Request):
     """
     Say Hello
     """
+
+    logging = request.state.logging
+    logging.debug('Hello from logger')
 
     return {"message": "Hello World!"}

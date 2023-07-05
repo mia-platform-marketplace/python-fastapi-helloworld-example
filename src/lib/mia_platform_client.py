@@ -1,4 +1,5 @@
 import os
+import sys
 import logging
 import requests
 
@@ -37,8 +38,16 @@ class MiaPlatformClient():
         self.session = requests.Session()
         self.session.auth = MiaPlatformAuth()
 
+        logging.basicConfig(
+            stream=sys.stdout,
+            level=os.environ.get('LOG_LEVEL', logging.DEBUG),
+            format="%(levelname)s:\t%(message)s"
+        )
+
+        self.logging = logging
+
     def get(self, url, **kwargs):
-        logging.debug(f'Start - MiaPlatformClient GET {url}')
+        self.logging.debug(f'Start - MiaPlatformClient GET {url}')
 
         response = self.session.get(url, **kwargs)
 
@@ -48,12 +57,12 @@ class MiaPlatformClient():
             logging.error(message)
             raise Exception(message)
 
-        logging.debug(f'End - MiaPlatformClient GET {url}')
+        self.logging.debug(f'End - MiaPlatformClient GET {url}')
 
         return response
 
     def get_by_id(self, url, _id, **kwargs):
-        logging.debug(f'Start - MiaPlatformClient GET BY ID {url}/{_id}/')
+        self.logging.debug(f'Start - MiaPlatformClient GET BY ID {url}/{_id}/')
 
         response = self.session.get(f'{url}/{_id}/', **kwargs)
 
@@ -63,12 +72,12 @@ class MiaPlatformClient():
             logging.error(message)
             raise Exception(message)
 
-        logging.debug(f'End - MiaPlatformClient GET BY ID {url}/{_id}/')
+        self.logging.debug(f'End - MiaPlatformClient GET BY ID {url}/{_id}/')
 
         return response
 
     def count(self, url, **kwargs):
-        logging.debug(f'Start - MiaPlatformClient COUNT {url}')
+        self.logging.debug(f'Start - MiaPlatformClient COUNT {url}')
 
         response = self.session.get(f'{url}/count/', **kwargs)
 
@@ -78,12 +87,12 @@ class MiaPlatformClient():
             logging.error(message)
             raise Exception(message)
 
-        logging.debug(f'End - MiaPlatformClient GET BY ID {url}')
+        self.logging.debug(f'End - MiaPlatformClient GET BY ID {url}')
 
         return response
 
     def post(self, url, data=None, **kwargs):
-        logging.debug(f'Start - MiaPlatformClient POST {url}')
+        self.logging.debug(f'Start - MiaPlatformClient POST {url}')
 
         response = self.session.post(url, data, **kwargs)
 
@@ -93,12 +102,12 @@ class MiaPlatformClient():
             logging.error(message)
             raise Exception(message)
 
-        logging.debug(f'End - MiaPlatformClient POST {url}')
+        self.logging.debug(f'End - MiaPlatformClient POST {url}')
 
         return response
 
     def put(self, url, data=None, **kwargs):
-        logging.debug(f'Start - MiaPlatformClient PUT {url}')
+        self.logging.debug(f'Start - MiaPlatformClient PUT {url}')
 
         response = self.session.put(url, data, **kwargs)
 
@@ -108,12 +117,12 @@ class MiaPlatformClient():
             logging.error(message)
             raise Exception(message)
 
-        logging.debug(f'End - MiaPlatformClient PUT {url}')
+        self.logging.debug(f'End - MiaPlatformClient PUT {url}')
 
         return response
 
     def patch(self, url, _id, data=None, **kwargs):
-        logging.debug(f'Start - MiaPlatformClient PATCH {url}/{_id}/')
+        self.logging.debug(f'Start - MiaPlatformClient PATCH {url}/{_id}/')
 
         response = self.session.patch(f'{url}/{_id}/', data, **kwargs)
 
@@ -123,12 +132,12 @@ class MiaPlatformClient():
             logging.error(message)
             raise Exception(message)
 
-        logging.debug(f'End - MiaPlatformClient PATCH {url}/{_id}/')
+        self.logging.debug(f'End - MiaPlatformClient PATCH {url}/{_id}/')
 
         return response
 
     def delete(self, url, **kwargs):
-        logging.debug(f'Start - MiaPlatformClient DELETE {url}')
+        self.logging.debug(f'Start - MiaPlatformClient DELETE {url}')
 
         response = self.session.delete(url, **kwargs)
 
@@ -138,12 +147,13 @@ class MiaPlatformClient():
             logging.error(message)
             raise Exception(message)
 
-        logging.debug(f'End - MiaPlatformClient DELETE {url}')
+        self.logging.debug(f'End - MiaPlatformClient DELETE {url}')
 
         return response
 
     def delete_by_id(self, url, _id, **kwargs):
-        logging.debug(f'Start - MiaPlatformClient DELETE BY ID {url}/{_id}/')
+        self.logging.debug(
+            f'Start - MiaPlatformClient DELETE BY ID {url}/{_id}/')
 
         response = self.session.delete(f'{url}/{_id}/', **kwargs)
 
@@ -153,6 +163,7 @@ class MiaPlatformClient():
             logging.error(message)
             raise Exception(message)
 
-        logging.debug(f'End - MiaPlatformClient DELETE BY ID {url}/{_id}/')
+        self.logging.debug(
+            f'End - MiaPlatformClient DELETE BY ID {url}/{_id}/')
 
         return response

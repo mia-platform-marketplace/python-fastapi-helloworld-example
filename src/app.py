@@ -1,8 +1,9 @@
 import os
 import uvicorn
-from fastapi import FastAPI
 from dotenv import load_dotenv
+from fastapi import FastAPI
 
+from src.middlewares.logger import LoggerMiddleware
 from src.apis.core.liveness import liveness_handler
 from src.apis.core.readiness import readiness_handler
 from src.apis.core.checkup import checkup_handler
@@ -13,9 +14,12 @@ load_dotenv('default.env')
 
 app = FastAPI(
     openapi_url="/documentation/json",
-    docs_url=None,
+    # docs_url=None,
     redoc_url=None
 )
+
+# Middlewares
+app.add_middleware(LoggerMiddleware)
 
 # Core
 app.include_router(liveness_handler.router)
