@@ -11,6 +11,9 @@ setup:
 	pip install -r requirements.txt
 	pre-commit install
 
+freeze:
+	pip freeze > requirements.txt
+
 start:
 	python -m src.app
 
