@@ -21,6 +21,9 @@ lint:
 test:
 	python -m pytest tests
 
+debug:
+	python -m pytest tests --trace
+
 coverage:
 	coverage run --data-file ${COVERAGE_DATA_FILE} -m pytest tests
 	coverage html --data-file ${COVERAGE_DATA_FILE} -d ${COVERAGE_HTML_DIR}
