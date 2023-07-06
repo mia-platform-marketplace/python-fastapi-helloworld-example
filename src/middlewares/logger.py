@@ -13,7 +13,7 @@ class LoggerMiddleware(BaseHTTPMiddleware):
         logging.basicConfig(
             stream=sys.stdout,
             level=os.environ.get('LOG_LEVEL', logging.DEBUG),
-            format="%(levelname)s:\t%(message)s"
+            format="%(asctime)s %(levelname)s %(message)s"
         )
 
         request.state.logging = logging
