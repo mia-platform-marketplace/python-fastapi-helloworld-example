@@ -41,7 +41,7 @@ class MiaPlatformClient():
         logging.basicConfig(
             stream=sys.stdout,
             level=os.environ.get('LOG_LEVEL', logging.DEBUG),
-            format="%(asctime)s %(levelname)s %(message)s"
+            format="%(levelname)s:\t%(message)s"
         )
 
         self.logging = logging
