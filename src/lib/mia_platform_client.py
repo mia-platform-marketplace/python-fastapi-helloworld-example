@@ -1,9 +1,8 @@
 import os
-import sys
-import logging
 import requests
 
 from src.apis.schemas.header_schema import HeaderRequest
+from src.utils.logger_conf import logging
 
 
 class MiaPlatformAuth(requests.auth.AuthBase):
@@ -37,13 +36,6 @@ class MiaPlatformClient():
     def __init__(self):
         self.session = requests.Session()
         self.session.auth = MiaPlatformAuth()
-
-        logging.basicConfig(
-            stream=sys.stdout,
-            level=os.environ.get('LOG_LEVEL', logging.DEBUG),
-            format="%(levelname)s:\t%(message)s"
-        )
-
         self.logging = logging
 
     def get(self, url, **kwargs):
