@@ -12,13 +12,10 @@ class MiaPlatformAuth(requests.auth.AuthBase):
 
     def __init__(self):
         self.header_request = HeaderRequest(
-            LOG_LEVEL=os.environ.get('LOG_LEVEL'),
             USERID_HEADER_KEY=os.environ.get('USERID_HEADER_KEY'),
             GROUPS_HEADER_KEY=os.environ.get('GROUPS_HEADER_KEY'),
             CLIENTTYPE_HEADER_KEY=os.environ.get('CLIENTTYPE_HEADER_KEY'),
             BACKOFFICE_HEADER_KEY=os.environ.get('BACKOFFICE_HEADER_KEY'),
-            MICROSERVICE_GATEWAY_SERVICE_NAME=os.environ.get(
-                'MICROSERVICE_GATEWAY_SERVICE_NAME'),
         )
 
     def __call__(self, req):
