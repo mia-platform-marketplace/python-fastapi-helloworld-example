@@ -11,6 +11,8 @@ class TestMiaPlatformClient:
     Test all functionalities of Mia Platform Client
     """
 
+    # Headers
+
     def validate_sent_headers(self, required_headers, response):
         """
         Validate requests headers
@@ -18,6 +20,44 @@ class TestMiaPlatformClient:
 
         headers = response.request.headers.items()
         assert all(param in headers for param in required_headers)
+
+    def test_extra_headers(self, server):
+        """
+        Sucessfully send extra headers
+        """
+
+        baseurl, required_headers = server
+
+        url = f'{baseurl}/'
+        body = [{'message': 'Hi :)'}]
+        headers = {
+            'Cookie': 'sid=dummy-sid',
+            'Content-Type': 'application/json'
+        }
+
+        httpretty.register_uri(
+            method=httpretty.GET,
+            uri=url,
+            status=status.HTTP_200_OK,
+            body=json.dumps(body)
+        )
+
+        mia_platform_client = MiaPlatformClient()
+        response = mia_platform_client.get(
+            url,
+            headers=headers
+        )
+
+        # Request
+        assert response.request.url == url
+        assert response.request.method == httpretty.GET
+
+        # Response
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json() == body
+
+        self.validate_sent_headers(required_headers, response)
+        self.validate_sent_headers(headers.items(), response)
 
     # Get
 
