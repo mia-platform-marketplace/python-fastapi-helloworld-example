@@ -1,8 +1,9 @@
 import os
 import uvicorn
-from fastapi import FastAPI
 from dotenv import load_dotenv
+from fastapi import FastAPI
 
+from src.middlewares.logger import LoggerMiddleware
 from src.apis.core.liveness import liveness_handler
 from src.apis.core.readiness import readiness_handler
 from src.apis.core.checkup import checkup_handler
@@ -17,6 +18,9 @@ app = FastAPI(
     redoc_url=None
 )
 
+# Middlewares
+app.add_middleware(LoggerMiddleware)
+
 # Core
 app.include_router(liveness_handler.router)
 app.include_router(readiness_handler.router)
@@ -30,5 +34,5 @@ if __name__ == '__main__':
     uvicorn.run(
         app,
         host='0.0.0.0',
-        port=os.environ.get('HTTP_PORT', 3000)
+        port=int(os.environ.get('HTTP_PORT', 3000))
     )
