@@ -10,7 +10,9 @@ class MiaPlatformAuth(requests.auth.AuthBase):
     def __init__(self, headers, logging):
         self.headers_to_proxy = {}
 
-        header_keys_to_proxy = os.environ.get('HEADER_KEYS_TO_PROXY').split(',')
+        header_keys_to_proxy = os.environ.get(
+            'HEADER_KEYS_TO_PROXY'
+        ).split(',')
 
         for header_key in header_keys_to_proxy:
             try:

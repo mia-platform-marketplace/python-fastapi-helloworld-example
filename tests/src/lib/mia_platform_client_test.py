@@ -4,9 +4,27 @@ import httpretty
 from fastapi import status
 
 from src.lib.mia_platform_client import MiaPlatformClient
+from src.utils.logger_conf import logging
 
 
-@pytest.mark.skip()
+@pytest.fixture()
+def baseurl():
+    baseurl = 'http://www.dummy-url.com'
+    yield baseurl
+
+
+@pytest.fixture()
+def default_required_headers():
+    headers = {
+        'miauserid': 'miauserid',
+        'miausergroups': 'miausergroups',
+        'miaclienttype': 'miaclienttype',
+        'client-type': 'client-type',
+        'x-request-id': 'x-request-id'
+    }
+    yield headers
+
+
 class TestMiaPlatformClient:
     """
     Test all functionalities of Mia Platform Client
@@ -22,12 +40,13 @@ class TestMiaPlatformClient:
         headers = response.request.headers.items()
         assert all(param in headers for param in required_headers)
 
-    def test_extra_headers(self, server):
+    @pytest.mark.skip()
+    def test_extra_headers(self, mock_server):
         """
         Sucessfully send extra headers
         """
 
-        baseurl, required_headers = server
+        baseurl, required_headers = mock_server
 
         url = f'{baseurl}/'
         body = [{'message': 'Hi :)'}]
@@ -62,24 +81,27 @@ class TestMiaPlatformClient:
 
     # Get
 
-    def test_200_get(self, server):
+    def test_200_get(self, baseurl, default_required_headers, mock_server):
         """
         Sucessfully retrive the resources from the collection
         """
 
-        baseurl, required_headers = server
-
-        url = f'{baseurl}/'
+        path = '/resource'
+        url = f'{baseurl}{path}'
         body = [{'message': 'Hi :)'}]
 
-        httpretty.register_uri(
+        mock_server.set_baseurl(baseurl)
+        mock_server.register_uri(
             method=httpretty.GET,
-            uri=url,
+            uri=path,
             status=status.HTTP_200_OK,
             body=json.dumps(body)
         )
 
-        mia_platform_client = MiaPlatformClient()
+        mia_platform_client = MiaPlatformClient(
+            default_required_headers,
+            logging
+        )
         response = mia_platform_client.get(url)
 
         # Request
@@ -90,8 +112,12 @@ class TestMiaPlatformClient:
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == body
 
-        self.validate_sent_headers(required_headers, response)
+        # self.validate_sent_headers(
+        #     mock_server.get_required_headers(),
+        #     response
+        # )
 
+    @pytest.mark.skip()
     def test_500_get(self, server):
         """
         Error on retriving the resources from the collection
@@ -118,6 +144,7 @@ class TestMiaPlatformClient:
 
     # Get by id
 
+    @pytest.mark.skip()
     def test_200_get_by_id(self, server):
         """
         Sucessfully retrive the resource :id from the collection
@@ -149,6 +176,7 @@ class TestMiaPlatformClient:
 
         self.validate_sent_headers(required_headers, response)
 
+    @pytest.mark.skip()
     def test_404_get_by_id(self, server):
         """
         Required resource :id no found in the collection
@@ -174,6 +202,7 @@ class TestMiaPlatformClient:
         ):
             mia_platform_client.get_by_id(baseurl, _id)
 
+    @pytest.mark.skip()
     def test_500_get_by_id(self, server):
         """
         Error on retriving the resource :id in the collection
@@ -201,6 +230,7 @@ class TestMiaPlatformClient:
 
     # Count
 
+    @pytest.mark.skip()
     def test_200_count(self, server):
         """
         Sucessfully count the resources in the collection
@@ -231,6 +261,7 @@ class TestMiaPlatformClient:
 
         self.validate_sent_headers(required_headers, response)
 
+    @pytest.mark.skip()
     def test_500_count(self, server):
         """
         Error on counting the resources in the collection
@@ -259,6 +290,7 @@ class TestMiaPlatformClient:
 
     # Post
 
+    @pytest.mark.skip()
     def test_201_post(self, server):
         """
         Sucessfully create the resource in the collection
@@ -289,6 +321,7 @@ class TestMiaPlatformClient:
 
         self.validate_sent_headers(required_headers, response)
 
+    @pytest.mark.skip()
     def test_500_post(self, server):
         """
         Error on creating the resource in the collection
@@ -317,6 +350,7 @@ class TestMiaPlatformClient:
 
     # Put
 
+    @pytest.mark.skip()
     def test_200_put(self, server):
         """
         Sucessfully overwrite the resouce in the collection
@@ -347,6 +381,7 @@ class TestMiaPlatformClient:
 
         self.validate_sent_headers(required_headers, response)
 
+    @pytest.mark.skip()
     def test_201_put(self, server):
         """
         Sucessfully create the resource in the collection
@@ -377,6 +412,7 @@ class TestMiaPlatformClient:
 
         self.validate_sent_headers(required_headers, response)
 
+    @pytest.mark.skip()
     def test_500_put(self, server):
         """
         Error on creating / overwriting the resource in the collection
@@ -405,6 +441,7 @@ class TestMiaPlatformClient:
 
     # Patch
 
+    @pytest.mark.skip()
     def test_200_patch_by_id(self, server):
         """
         Sucessfully update the resource in the collection
@@ -436,6 +473,7 @@ class TestMiaPlatformClient:
 
         self.validate_sent_headers(required_headers, response)
 
+    @pytest.mark.skip()
     def test_404_patch_by_id(self, server):
         """
         Resource :id to update not found in the collection
@@ -461,6 +499,7 @@ class TestMiaPlatformClient:
         ):
             mia_platform_client.patch(baseurl, _id)
 
+    @pytest.mark.skip()
     def test_500_patch_by_id(self, server):
         """
         Error on updating the resource :id in the collection
@@ -488,6 +527,7 @@ class TestMiaPlatformClient:
 
     # Delete
 
+    @pytest.mark.skip()
     def test_204_delete(self, server):
         """
         Sucessfully delete the resources from collection
@@ -515,6 +555,7 @@ class TestMiaPlatformClient:
 
         self.validate_sent_headers(required_headers, response)
 
+    @pytest.mark.skip()
     def test_500_delete(self, server):
         """
         Error on deleting the resources from the collection
@@ -541,6 +582,7 @@ class TestMiaPlatformClient:
 
     # Delete by id
 
+    @pytest.mark.skip()
     def test_204_delete_by_id(self, server):
         """
         Sucessfully delete the resource :id from the collection
@@ -569,6 +611,7 @@ class TestMiaPlatformClient:
 
         self.validate_sent_headers(required_headers, response)
 
+    @pytest.mark.skip()
     def test_404_delete_by_id(self, server):
         """
         Resource :id to delete not found in the collection
@@ -594,6 +637,7 @@ class TestMiaPlatformClient:
         ):
             mia_platform_client.delete_by_id(baseurl, _id)
 
+    @pytest.mark.skip()
     def test_500_delete_by_id(self, server):
         """
         Error on deleting the resource :id from the collection

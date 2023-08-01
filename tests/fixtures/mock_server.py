@@ -3,8 +3,6 @@ import pytest
 import httpretty
 from dotenv import load_dotenv
 
-# from src.apis.schemas.header_schema import HeaderRequest
-
 
 class MockServer:
     """
@@ -14,15 +12,13 @@ class MockServer:
     def __init__(self):
         load_dotenv('default.env')
 
-        # self.required_headers = HeaderRequest(
-        #     LOG_LEVEL=os.environ.get('LOG_LEVEL'),
-        #     USERID_HEADER_KEY=os.environ.get('USERID_HEADER_KEY'),
-        #     GROUPS_HEADER_KEY=os.environ.get('GROUPS_HEADER_KEY'),
-        #     CLIENTTYPE_HEADER_KEY=os.environ.get('CLIENTTYPE_HEADER_KEY'),
-        #     BACKOFFICE_HEADER_KEY=os.environ.get('BACKOFFICE_HEADER_KEY'),
-        #     MICROSERVICE_GATEWAY_SERVICE_NAME=os.environ.get(
-        #         'MICROSERVICE_GATEWAY_SERVICE_NAME'),
-        # ).__dict__.items()
+        self.required_headers = {
+            'miauserid': 'miauserid',
+            'miausergroups': 'miausergroups',
+            'miaclienttype': 'miaclienttype',
+            'client-type': 'client-type',
+            'x-request-id': 'x-request-id'
+        }
         self.baseurl = None
 
     def enable(self):
