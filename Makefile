@@ -22,7 +22,7 @@ lint:
 	python -m pylint tests
 
 test:
-	python -m pytest tests
+	python -m pytest tests -s
 
 coverage:
 	coverage run --data-file ${COVERAGE_DATA_FILE} -m pytest tests

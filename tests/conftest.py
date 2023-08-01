@@ -5,7 +5,6 @@ from dotenv import load_dotenv
 from fastapi.testclient import TestClient
 
 from src.app import app
-from src.apis.schemas.header_schema import HeaderRequest
 
 
 @pytest.fixture
@@ -15,6 +14,13 @@ def client():
     """
 
     with TestClient(app) as test_client:
+        test_client.headers = {
+            'miauserid': 'miauserid',
+            'miausergroups': 'miausergroups',
+            'miaclienttype': 'miaclienttype',
+            'client-type': 'client-type',
+            'x-request-id': 'x-request-id'
+        }
         yield test_client
 
 
@@ -27,12 +33,14 @@ def server():
     load_dotenv('default.env')
 
     baseurl = 'http://testserver'
-    require_headers = HeaderRequest(
-        USERID_HEADER_KEY=os.environ.get('USERID_HEADER_KEY'),
-        GROUPS_HEADER_KEY=os.environ.get('GROUPS_HEADER_KEY'),
-        CLIENTTYPE_HEADER_KEY=os.environ.get('CLIENTTYPE_HEADER_KEY'),
-        BACKOFFICE_HEADER_KEY=os.environ.get('BACKOFFICE_HEADER_KEY'),
-    ).__dict__.items()
+    # require_headers = HeaderRequest(
+    #     miauserid='miauserid',
+    #     miausergroups='miausergroups',
+    #     miaclienttype='miaclienttype',
+    #     client_type='client-type',
+    #     secret='secret',
+    #     cookie='cookie',
+    # ).__dict__.items()
 
     httpretty.enable(verbose=False, allow_net_connect=False)
 

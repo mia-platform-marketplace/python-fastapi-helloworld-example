@@ -1,26 +1,29 @@
 import os
 import requests
 
-from src.apis.schemas.header_schema import HeaderRequest
-from src.utils.logger_conf import logging
-
 
 class MiaPlatformAuth(requests.auth.AuthBase):
     """
     Attaches http headers to the given request object
     """
 
-    def __init__(self):
-        self.header_request = HeaderRequest(
-            USERID_HEADER_KEY=os.environ.get('USERID_HEADER_KEY'),
-            GROUPS_HEADER_KEY=os.environ.get('GROUPS_HEADER_KEY'),
-            CLIENTTYPE_HEADER_KEY=os.environ.get('CLIENTTYPE_HEADER_KEY'),
-            BACKOFFICE_HEADER_KEY=os.environ.get('BACKOFFICE_HEADER_KEY'),
-        )
+    def __init__(self, headers, logging):
+        self.headers_to_proxy = {}
+
+        header_keys_to_proxy = os.environ.get('HEADER_KEYS_TO_PROXY').split(',')
+
+        for header_key in header_keys_to_proxy:
+            try:
+                self.headers_to_proxy[header_key] = headers[header_key]
+            except KeyError:
+                logging.warning(
+                    f'The parameter "{header_key}" is missing from the request headers'
+                )
 
     def __call__(self, req):
-        for key, value in self.header_request.__dict__.items():
+        for key, value in self.headers_to_proxy.items():
             req.headers[key] = value
+
         return req
 
 
@@ -30,9 +33,9 @@ class MiaPlatformClient():
     application cluster
     """
 
-    def __init__(self):
+    def __init__(self, headers, logging):
         self.session = requests.Session()
-        self.session.auth = MiaPlatformAuth()
+        self.session.auth = MiaPlatformAuth(headers, logging)
         self.logging = logging
 
     def get(self, url, **kwargs):

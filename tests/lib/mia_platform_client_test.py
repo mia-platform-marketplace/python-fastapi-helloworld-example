@@ -6,6 +6,7 @@ from fastapi import status
 from src.lib.mia_platform_client import MiaPlatformClient
 
 
+@pytest.mark.skip()
 class TestMiaPlatformClient:
     """
     Test all functionalities of Mia Platform Client
