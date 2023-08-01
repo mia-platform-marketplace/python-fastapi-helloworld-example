@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Request, status
 
-from src.apis.schemas.message_schema import MessageResponse
+from src.schemas.message_schema import MessageResponse
 
 
 router = APIRouter()
