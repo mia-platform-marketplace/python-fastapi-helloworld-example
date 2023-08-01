@@ -10,12 +10,12 @@ def test_client():
     This client can call the developed application
     """
 
-    with TestClient(app) as test_client:
-        test_client.headers = {
+    with TestClient(app) as client:
+        client.headers = {
             'miauserid': 'miauserid',
             'miausergroups': 'miausergroups',
             'miaclienttype': 'miaclienttype',
             'client-type': 'client-type',
             'x-request-id': 'x-request-id'
         }
-        yield test_client
+        yield client

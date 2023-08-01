@@ -1,4 +1,3 @@
-import os
 import pytest
 import httpretty
 from dotenv import load_dotenv
@@ -77,9 +76,9 @@ def mock_server():
     This server is a utility that can be used to run a simple mock of an external service
     """
 
-    mock_server = MockServer()
-    mock_server.enable()
+    server = MockServer()
+    server.enable()
 
-    yield mock_server
+    yield server
 
-    mock_server.disable()
+    server.disable()
