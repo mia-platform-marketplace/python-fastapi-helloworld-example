@@ -5,7 +5,7 @@ from src.app import app
 
 
 @pytest.fixture
-def client():
+def test_client():
     """
     This client can call the developed application
     """
