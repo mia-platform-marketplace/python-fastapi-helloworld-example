@@ -2,6 +2,8 @@ import pytest
 import httpretty
 from dotenv import load_dotenv
 
+from src.schemas.header_schema import HeaderSchema
+
 
 class MockServer:
     """
@@ -11,13 +13,7 @@ class MockServer:
     def __init__(self):
         load_dotenv('default.env')
 
-        self.required_headers = {
-            'miauserid': 'miauserid',
-            'miausergroups': 'miausergroups',
-            'miaclienttype': 'miaclienttype',
-            'client-type': 'client-type',
-            'x-request-id': 'x-request-id'
-        }
+        self.required_headers = HeaderSchema().dict()
         self.baseurl = None
 
     def enable(self):

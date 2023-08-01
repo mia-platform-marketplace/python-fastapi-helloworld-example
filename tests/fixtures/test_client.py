@@ -2,6 +2,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from src.app import app
+from src.schemas.header_schema import HeaderSchema
 
 
 @pytest.fixture
@@ -11,11 +12,5 @@ def test_client():
     """
 
     with TestClient(app) as client:
-        client.headers = {
-            'miauserid': 'miauserid',
-            'miausergroups': 'miausergroups',
-            'miaclienttype': 'miaclienttype',
-            'client-type': 'client-type',
-            'x-request-id': 'x-request-id'
-        }
+        client.headers = HeaderSchema().dict()
         yield client

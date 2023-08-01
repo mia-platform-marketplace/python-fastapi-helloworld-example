@@ -10,8 +10,11 @@ class MiaPlatformClientMiddleware(BaseHTTPMiddleware):
     """
 
     async def dispatch(self, request, call_next):
+        keys = [key.replace('_', '-') for key in request.headers.keys()]
+        values = request.headers.values()
+
         request.state.mia_platform_client = MiaPlatformClient(
-            dict(request.headers.items()),
+            dict(zip(keys, values)),
             logging
         )
 
