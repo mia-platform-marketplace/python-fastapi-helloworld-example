@@ -42,7 +42,7 @@ class TestMiaPlatformClient:
         mia_platform_client
     ):
         """
-        TODO: add description
+        Successfully make request with extra headers
         """
 
         path = 'resources'

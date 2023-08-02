@@ -1,20 +1,11 @@
 import pytest
 import httpretty
-from dotenv import load_dotenv
-
-from src.schemas.header_schema import HeaderSchema
 
 
 class MockServer:
     """
-    TODO: add description
+    A simple mock server for testing purposes.
     """
-
-    def __init__(self):
-        load_dotenv('default.env')
-
-        self.required_headers = HeaderSchema().model_dump(by_alias=True)
-        self.baseurl = None
 
     def enable(self):
         httpretty.enable(verbose=False, allow_net_connect=False)
