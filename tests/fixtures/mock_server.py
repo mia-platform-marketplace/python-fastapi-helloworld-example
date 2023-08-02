@@ -17,7 +17,7 @@ class MockServer:
         self.baseurl = None
 
     def enable(self):
-        httpretty.enable(verbose=True, allow_net_connect=False)
+        httpretty.enable(verbose=False, allow_net_connect=False)
 
     def disable(self):
         httpretty.reset()

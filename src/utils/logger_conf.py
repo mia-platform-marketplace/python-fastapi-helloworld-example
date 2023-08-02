@@ -3,17 +3,12 @@ import sys
 import logging
 
 
-# Stop uvicorn log propagation otherwise we would have duplicate logs
-uvicorn_logger = logging.getLogger("uvicorn")
-uvicorn_logger.propagate = False
+logger = logging.getLogger('mialogger')
 
-# Set asyncio log level to warning for less verbose logging
-asyncio_logger = logging.getLogger('asyncio')
-asyncio_logger.setLevel(logging.WARNING)
+handler = logging.StreamHandler(sys.stdout)
+handler.setLevel(os.environ.get('LOG_LEVEL', logging.DEBUG))
 
+formatter = logging.Formatter('%(levelname)s:\t%(message)s')
+handler.setFormatter(formatter)
 
-logging.basicConfig(
-    stream=sys.stdout,
-    level=os.environ.get('LOG_LEVEL', logging.DEBUG),
-    format="%(levelname)s:\t%(message)s"
-)
+logger.addHandler(handler)

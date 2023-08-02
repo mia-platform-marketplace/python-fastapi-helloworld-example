@@ -1,6 +1,6 @@
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from src.utils.logger_conf import logging
+from src.utils.logger_conf import logger
 from src.lib.mia_platform_client import MiaPlatformClient
 
 
@@ -15,7 +15,7 @@ class MiaPlatformClientMiddleware(BaseHTTPMiddleware):
 
         request.state.mia_platform_client = MiaPlatformClient(
             dict(zip(keys, values)),
-            logging
+            logger
         )
 
         response = await call_next(request)

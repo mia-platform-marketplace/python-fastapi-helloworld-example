@@ -17,7 +17,7 @@ async def hello_world(request: Request):
     Say Hello
     """
 
-    logging = request.state.logging
-    logging.debug('Test logger from hello world endpoint')
+    logger = request.state.logger
+    logger.debug('Test logger from hello world endpoint')
 
     return {"message": "Hello World!"}
