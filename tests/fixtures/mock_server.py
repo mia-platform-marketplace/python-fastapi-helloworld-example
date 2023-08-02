@@ -13,7 +13,7 @@ class MockServer:
     def __init__(self):
         load_dotenv('default.env')
 
-        self.required_headers = HeaderSchema().dict()
+        self.required_headers = HeaderSchema().model_dump(by_alias=True)
         self.baseurl = None
 
     def enable(self):
@@ -23,17 +23,17 @@ class MockServer:
         httpretty.reset()
         httpretty.disable()
 
-    def set_required_headers(self, required_headers):
-        self.required_headers = required_headers
+    # def set_required_headers(self, required_headers):
+    #     self.required_headers = required_headers
 
-    def get_required_headers(self):
-        return self.required_headers
+    # def get_required_headers(self):
+    #     return self.required_headers
 
-    def set_baseurl(self, baseurl):
-        self.baseurl = baseurl
+    # def set_baseurl(self, baseurl):
+    #     self.baseurl = baseurl
 
-    def get_baseurl(self):
-        return self.baseurl
+    # def get_baseurl(self):
+    #     return self.baseurl
 
     # pylint: disable=R0913
     def register_uri(
@@ -49,12 +49,9 @@ class MockServer:
         priority=0,
         **headers
     ):
-        if self.baseurl is None:
-            raise Exception('baseurl is not set')
-
         httpretty.register_uri(
             method,
-            f'{self.baseurl}' if not uri else f'{self.baseurl}{uri}',
+            uri,
             body,
             adding_headers,
             forcing_headers,

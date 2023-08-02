@@ -12,5 +12,5 @@ def test_client():
     """
 
     with TestClient(app) as client:
-        client.headers = HeaderSchema().dict()
+        client.headers = HeaderSchema().model_dump(by_alias=True)
         yield client

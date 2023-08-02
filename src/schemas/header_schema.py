@@ -14,6 +14,6 @@ class HeaderSchema(BaseModel):
         alias='client-type'
     )
     x_request_id: str = Field(
-        default='client-type',
+        default='x-request-id',
         alias='x-request-id'
     )
