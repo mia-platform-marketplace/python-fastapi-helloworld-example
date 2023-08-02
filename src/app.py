@@ -3,8 +3,8 @@ import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI
 
-from src.middlewares.logger import LoggerMiddleware
-from src.middlewares.mia_platform_client import MiaPlatformClientMiddleware
+from src.middlewares.logger_middleware import LoggerMiddleware
+from src.middlewares.mia_platform_client_middleware import MiaPlatformClientMiddleware
 
 from src.apis.core.liveness import liveness_handler
 from src.apis.core.readiness import readiness_handler

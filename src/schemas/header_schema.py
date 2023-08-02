@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field
 
 class HeaderSchema(BaseModel):
     """
-    TODO: add description
+    The Header Scheme describe the header schema for a request.
     """
 
     miauserid: str = 'miauserid'

@@ -3,9 +3,16 @@ import pytest
 import httpretty
 from fastapi import status
 
-from src.utils.logger_conf import logger
+from src.utils.logger import logger
 from src.schemas.header_schema import HeaderSchema
 from src.lib.mia_platform_client import MiaPlatformClient
+
+
+@pytest.fixture(name='headers')
+def fixture_headers():
+    header_schema = HeaderSchema()
+    headers = header_schema.model_dump(by_alias=True)
+    yield headers
 
 
 @pytest.fixture(name='baseurl')
@@ -15,11 +22,8 @@ def fixture_baseurl():
 
 
 @pytest.fixture(name='mia_platform_client')
-def fixture_mia_platform_client():
-    mia_platform_client = MiaPlatformClient(
-        HeaderSchema().model_dump(by_alias=True),
-        logger
-    )
+def fixture_mia_platform_client(headers):
+    mia_platform_client = MiaPlatformClient(headers, logger)
     yield mia_platform_client
 
 
@@ -28,9 +32,61 @@ class TestMiaPlatformClient:
     Test all functionalities of Mia Platform Client
     """
 
+    # Headers
+
+    def test_200_get_with_extra_headers(
+        self,
+        headers,
+        baseurl,
+        mock_server,
+        mia_platform_client
+    ):
+        """
+        TODO: add description
+        """
+
+        path = 'resources'
+        url = f'{baseurl}/{path}'
+        body = [{'message': 'Hi :)'}]
+        extra_headers = {
+            'x-dummy': 'test',
+            'x-custom': '123'
+        }
+        expected_headers = {
+            **headers,
+            **extra_headers
+        }
+
+        mock_server.register_uri(
+            method=httpretty.GET,
+            uri=url,
+            status=status.HTTP_200_OK,
+            body=json.dumps(body)
+        )
+
+        response = mia_platform_client.get(
+            url,
+            headers=extra_headers
+        )
+
+        # Request
+        assert response.request.url == url
+        assert response.request.method == httpretty.GET
+        assert response.request.headers.items() >= expected_headers.items()
+
+        # Response
+        assert response.status_code == status.HTTP_200_OK
+        assert response.json() == body
+
     # Get
 
-    def test_200_get(self, baseurl, mock_server, mia_platform_client):
+    def test_200_get(
+        self,
+        headers,
+        baseurl,
+        mock_server,
+        mia_platform_client
+    ):
         """
         Sucessfully retrive the resources from the collection
         """
@@ -51,12 +107,18 @@ class TestMiaPlatformClient:
         # Request
         assert response.request.url == url
         assert response.request.method == httpretty.GET
+        assert response.request.headers.items() >= headers.items()
 
         # Response
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == body
 
-    def test_500_get(self, baseurl, mock_server, mia_platform_client):
+    def test_500_get(
+        self,
+        baseurl,
+        mock_server,
+        mia_platform_client
+    ):
         """
         Error on retriving the resources from the collection
         """
@@ -79,7 +141,13 @@ class TestMiaPlatformClient:
 
     # Get by id
 
-    def test_200_get_by_id(self, baseurl, mock_server, mia_platform_client):
+    def test_200_get_by_id(
+        self,
+        headers,
+        baseurl,
+        mock_server,
+        mia_platform_client
+    ):
         """
         Sucessfully retrive the resource :id from the collection
         """
@@ -101,12 +169,18 @@ class TestMiaPlatformClient:
         # Request
         assert response.request.url == url
         assert response.request.method == httpretty.GET
+        assert response.request.headers.items() >= headers.items()
 
         # Response
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == body
 
-    def test_404_get_by_id(self, baseurl, mock_server, mia_platform_client):
+    def test_404_get_by_id(
+        self,
+        baseurl,
+        mock_server,
+        mia_platform_client
+    ):
         """
         Required resource :id no found in the collection
         """
@@ -128,7 +202,12 @@ class TestMiaPlatformClient:
         ):
             mia_platform_client.get_by_id(f'{baseurl}/{path}', _id)
 
-    def test_500_get_by_id(self, baseurl, mock_server, mia_platform_client):
+    def test_500_get_by_id(
+        self,
+        baseurl,
+        mock_server,
+        mia_platform_client
+    ):
         """
         Error on retriving the resource :id in the collection
         """
@@ -152,7 +231,13 @@ class TestMiaPlatformClient:
 
     # Count
 
-    def test_200_count(self, baseurl, mock_server, mia_platform_client):
+    def test_200_count(
+        self,
+        headers,
+        baseurl,
+        mock_server,
+        mia_platform_client
+    ):
         """
         Sucessfully count the resources in the collection
         """
@@ -173,12 +258,18 @@ class TestMiaPlatformClient:
         # Request
         assert response.request.url == url
         assert response.request.method == httpretty.GET
+        assert response.request.headers.items() >= headers.items()
 
         # Response
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == body
 
-    def test_500_count(self, baseurl, mock_server, mia_platform_client):
+    def test_500_count(
+        self,
+        baseurl,
+        mock_server,
+        mia_platform_client
+    ):
         """
         Error on counting the resources in the collection
         """
@@ -203,7 +294,13 @@ class TestMiaPlatformClient:
 
     # Post
 
-    def test_201_post(self, baseurl, mock_server, mia_platform_client):
+    def test_201_post(
+        self,
+        headers,
+        baseurl,
+        mock_server,
+        mia_platform_client
+    ):
         """
         Sucessfully create the resource in the collection
         """
@@ -224,12 +321,18 @@ class TestMiaPlatformClient:
         # Request
         assert response.request.url == url
         assert response.request.method == httpretty.POST
+        assert response.request.headers.items() >= headers.items()
 
         # Response
         assert response.status_code == status.HTTP_201_CREATED
         assert response.json() == body
 
-    def test_500_post(self, baseurl, mock_server, mia_platform_client):
+    def test_500_post(
+        self,
+        baseurl,
+        mock_server,
+        mia_platform_client
+    ):
         """
         Error on creating the resource in the collection
         """
@@ -254,7 +357,13 @@ class TestMiaPlatformClient:
 
     # Put
 
-    def test_201_put(self, baseurl, mock_server, mia_platform_client):
+    def test_201_put(
+        self,
+        headers,
+        baseurl,
+        mock_server,
+        mia_platform_client
+    ):
         """
         Sucessfully create the resource in the collection
         """
@@ -275,12 +384,18 @@ class TestMiaPlatformClient:
         # Request
         assert response.request.url == url
         assert response.request.method == httpretty.PUT
+        assert response.request.headers.items() >= headers.items()
 
         # Response
         assert response.status_code == status.HTTP_201_CREATED
         assert response.json() == body
 
-    def test_500_put(self, baseurl, mock_server, mia_platform_client):
+    def test_500_put(
+        self,
+        baseurl,
+        mock_server,
+        mia_platform_client
+    ):
         """
         Error on creating the resource in the collection
         """
@@ -305,7 +420,13 @@ class TestMiaPlatformClient:
 
     # Patch
 
-    def test_200_patch_by_id(self, baseurl, mock_server, mia_platform_client):
+    def test_200_patch_by_id(
+        self,
+        headers,
+        baseurl,
+        mock_server,
+        mia_platform_client
+    ):
         """
         Sucessfully update the resource in the collection
         """
@@ -331,12 +452,18 @@ class TestMiaPlatformClient:
         # Request
         assert response.request.url == url
         assert response.request.method == httpretty.PATCH
+        assert response.request.headers.items() >= headers.items()
 
         # Response
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == body
 
-    def test_404_patch_by_id(self, baseurl, mock_server, mia_platform_client):
+    def test_404_patch_by_id(
+        self,
+        baseurl,
+        mock_server,
+        mia_platform_client
+    ):
         """
         Resource :id to update not found in the collection
         """
@@ -358,7 +485,12 @@ class TestMiaPlatformClient:
         ):
             mia_platform_client.patch(f'{baseurl}/{path}', _id)
 
-    def test_500_patch_by_id(self, baseurl, mock_server, mia_platform_client):
+    def test_500_patch_by_id(
+        self,
+        baseurl,
+        mock_server,
+        mia_platform_client
+    ):
         """
         Error on updating the resource :id in the collection
         """
@@ -382,7 +514,13 @@ class TestMiaPlatformClient:
 
     # Delete
 
-    def test_204_delete(self, baseurl, mock_server, mia_platform_client):
+    def test_204_delete(
+        self,
+        headers,
+        baseurl,
+        mock_server,
+        mia_platform_client
+    ):
         """
         Sucessfully delete the resources from collection
         """
@@ -401,11 +539,17 @@ class TestMiaPlatformClient:
         # Request
         assert response.request.url == url
         assert response.request.method == httpretty.DELETE
+        assert response.request.headers.items() >= headers.items()
 
         # Response
         assert response.status_code == status.HTTP_204_NO_CONTENT
 
-    def test_500_delete(self, baseurl, mock_server, mia_platform_client):
+    def test_500_delete(
+        self,
+        baseurl,
+        mock_server,
+        mia_platform_client
+    ):
         """
         Error on deleting the resources from the collection
         """
@@ -428,7 +572,13 @@ class TestMiaPlatformClient:
 
     # Delete by id
 
-    def test_204_delete_by_id(self, baseurl, mock_server, mia_platform_client):
+    def test_204_delete_by_id(
+        self,
+        headers,
+        baseurl,
+        mock_server,
+        mia_platform_client
+    ):
         """
         Sucessfully delete the resource :id from the collection
         """
@@ -448,11 +598,17 @@ class TestMiaPlatformClient:
         # Request
         assert response.request.url == url
         assert response.request.method == httpretty.DELETE
+        assert response.request.headers.items() >= headers.items()
 
         # Response
         assert response.status_code == status.HTTP_204_NO_CONTENT
 
-    def test_404_delete_by_id(self, baseurl, mock_server, mia_platform_client):
+    def test_404_delete_by_id(
+        self,
+        baseurl,
+        mock_server,
+        mia_platform_client
+    ):
         """
         Resource :id to delete not found in the collection
         """
@@ -474,7 +630,12 @@ class TestMiaPlatformClient:
         ):
             mia_platform_client.delete_by_id(f'{baseurl}/{path}', _id)
 
-    def test_500_delete_by_id(self, baseurl, mock_server, mia_platform_client):
+    def test_500_delete_by_id(
+        self,
+        baseurl,
+        mock_server,
+        mia_platform_client
+    ):
         """
         Error on deleting the resource :id from the collection
         """

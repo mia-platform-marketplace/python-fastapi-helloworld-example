@@ -1,6 +1,6 @@
 from fastapi import APIRouter, status
 
-from src.schemas.status_ok_schema import StatusOkResponse
+from src.schemas.status_ok_schema import StatusOkResponseSchema
 
 
 router = APIRouter()
@@ -8,7 +8,7 @@ router = APIRouter()
 
 @router.get(
     "/-/check-up",
-    response_model=StatusOkResponse,
+    response_model=StatusOkResponseSchema,
     status_code=status.HTTP_200_OK,
     tags=["Check-up"]
 )

@@ -1,6 +1,6 @@
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from src.utils.logger_conf import logger
+from src.utils.logger import logger
 from src.lib.mia_platform_client import MiaPlatformClient
 
 

@@ -1,9 +1,9 @@
 from pydantic import BaseModel
 
 
-class MessageResponse(BaseModel):
+class MessageResponseSchema(BaseModel):
     """
-    The Message Response scheme represents the simplest response that is possible to return
+    The Message Response schema represents the simplest response that is possible to return
     """
 
     message: str

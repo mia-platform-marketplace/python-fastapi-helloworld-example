@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Request, status
 
-from src.schemas.message_schema import MessageResponse
+from src.schemas.message_schema import MessageResponseSchema
 
 
 router = APIRouter()
@@ -8,7 +8,7 @@ router = APIRouter()
 
 @router.get(
     "/",
-    response_model=MessageResponse,
+    response_model=MessageResponseSchema,
     status_code=status.HTTP_200_OK,
     tags=["Hello World"]
 )

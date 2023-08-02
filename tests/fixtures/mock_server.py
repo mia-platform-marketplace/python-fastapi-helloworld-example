@@ -23,18 +23,6 @@ class MockServer:
         httpretty.reset()
         httpretty.disable()
 
-    # def set_required_headers(self, required_headers):
-    #     self.required_headers = required_headers
-
-    # def get_required_headers(self):
-    #     return self.required_headers
-
-    # def set_baseurl(self, baseurl):
-    #     self.baseurl = baseurl
-
-    # def get_baseurl(self):
-    #     return self.baseurl
-
     # pylint: disable=R0913
     def register_uri(
         self,
