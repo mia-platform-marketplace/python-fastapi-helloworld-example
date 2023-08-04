@@ -1,6 +1,6 @@
 from starlette.middleware.base import BaseHTTPMiddleware
 
-from src.utils.logger_conf import logging
+from src.utils.logger import logger
 
 
 class LoggerMiddleware(BaseHTTPMiddleware):
@@ -9,6 +9,6 @@ class LoggerMiddleware(BaseHTTPMiddleware):
     """
 
     async def dispatch(self, request, call_next):
-        request.state.logging = logging
+        request.state.logger = logger
         response = await call_next(request)
         return response

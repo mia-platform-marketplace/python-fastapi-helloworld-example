@@ -3,7 +3,9 @@ import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI
 
-from src.middlewares.logger import LoggerMiddleware
+from src.middlewares.logger_middleware import LoggerMiddleware
+from src.middlewares.mia_platform_client_middleware import MiaPlatformClientMiddleware
+
 from src.apis.core.liveness import liveness_handler
 from src.apis.core.readiness import readiness_handler
 from src.apis.core.checkup import checkup_handler
@@ -20,6 +22,7 @@ app = FastAPI(
 
 # Middlewares
 app.add_middleware(LoggerMiddleware)
+app.add_middleware(MiaPlatformClientMiddleware)
 
 # Core
 app.include_router(liveness_handler.router)

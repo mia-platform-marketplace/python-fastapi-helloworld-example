@@ -3,7 +3,28 @@ import pytest
 import httpretty
 from fastapi import status
 
+from src.utils.logger import logger
+from src.schemas.header_schema import HeaderSchema
 from src.lib.mia_platform_client import MiaPlatformClient
+
+
+@pytest.fixture(name='headers')
+def fixture_headers():
+    header_schema = HeaderSchema()
+    headers = header_schema.model_dump(by_alias=True)
+    yield headers
+
+
+@pytest.fixture(name='baseurl')
+def fixture_baseurl():
+    baseurl = 'http://www.dummy-url.com'
+    yield baseurl
+
+
+@pytest.fixture(name='mia_platform_client')
+def fixture_mia_platform_client(headers):
+    mia_platform_client = MiaPlatformClient(headers, logger)
+    yield mia_platform_client
 
 
 class TestMiaPlatformClient:
@@ -13,100 +34,103 @@ class TestMiaPlatformClient:
 
     # Headers
 
-    def validate_sent_headers(self, required_headers, response):
+    def test_200_get_with_extra_headers(
+        self,
+        headers,
+        baseurl,
+        mock_server,
+        mia_platform_client
+    ):
         """
-        Validate requests headers
-        """
-
-        headers = response.request.headers.items()
-        assert all(param in headers for param in required_headers)
-
-    def test_extra_headers(self, server):
-        """
-        Sucessfully send extra headers
+        Successfully make request with extra headers
         """
 
-        baseurl, required_headers = server
-
-        url = f'{baseurl}/'
+        path = 'resources'
+        url = f'{baseurl}/{path}'
         body = [{'message': 'Hi :)'}]
-        headers = {
-            'Cookie': 'sid=dummy-sid',
-            'Content-Type': 'application/json'
+        extra_headers = {
+            'x-dummy': 'test',
+            'x-custom': '123'
+        }
+        expected_headers = {
+            **headers,
+            **extra_headers
         }
 
-        httpretty.register_uri(
+        mock_server.register_uri(
             method=httpretty.GET,
             uri=url,
             status=status.HTTP_200_OK,
             body=json.dumps(body)
         )
 
-        mia_platform_client = MiaPlatformClient()
         response = mia_platform_client.get(
             url,
-            headers=headers
+            headers=extra_headers
         )
 
         # Request
         assert response.request.url == url
         assert response.request.method == httpretty.GET
+        assert response.request.headers.items() >= expected_headers.items()
 
         # Response
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == body
 
-        self.validate_sent_headers(required_headers, response)
-        self.validate_sent_headers(headers.items(), response)
-
     # Get
 
-    def test_200_get(self, server):
+    def test_200_get(
+        self,
+        headers,
+        baseurl,
+        mock_server,
+        mia_platform_client
+    ):
         """
         Sucessfully retrive the resources from the collection
         """
 
-        baseurl, required_headers = server
-
-        url = f'{baseurl}/'
+        path = 'resources'
+        url = f'{baseurl}/{path}'
         body = [{'message': 'Hi :)'}]
 
-        httpretty.register_uri(
+        mock_server.register_uri(
             method=httpretty.GET,
             uri=url,
             status=status.HTTP_200_OK,
             body=json.dumps(body)
         )
 
-        mia_platform_client = MiaPlatformClient()
         response = mia_platform_client.get(url)
 
         # Request
         assert response.request.url == url
         assert response.request.method == httpretty.GET
+        assert response.request.headers.items() >= headers.items()
 
         # Response
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == body
 
-        self.validate_sent_headers(required_headers, response)
-
-    def test_500_get(self, server):
+    def test_500_get(
+        self,
+        baseurl,
+        mock_server,
+        mia_platform_client
+    ):
         """
         Error on retriving the resources from the collection
         """
 
-        baseurl, _ = server
+        path = 'resources'
+        url = f'{baseurl}/{path}'
 
-        url = f'{baseurl}/'
-
-        httpretty.register_uri(
+        mock_server.register_uri(
             method=httpretty.GET,
             uri=url,
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
-
-        mia_platform_client = MiaPlatformClient()
 
         with pytest.raises(
             Exception,
@@ -117,195 +141,212 @@ class TestMiaPlatformClient:
 
     # Get by id
 
-    def test_200_get_by_id(self, server):
+    def test_200_get_by_id(
+        self,
+        headers,
+        baseurl,
+        mock_server,
+        mia_platform_client
+    ):
         """
         Sucessfully retrive the resource :id from the collection
         """
 
-        baseurl, required_headers = server
-
         _id = 1
-        url = f'{baseurl}/{_id}/'
+        path = 'resources'
+        url = f'{baseurl}/{path}/{_id}'
         body = {'message': 'Hi :)'}
 
-        httpretty.register_uri(
+        mock_server.register_uri(
             method=httpretty.GET,
             uri=url,
             status=status.HTTP_200_OK,
             body=json.dumps(body)
         )
 
-        mia_platform_client = MiaPlatformClient()
-        response = mia_platform_client.get_by_id(baseurl, _id)
+        response = mia_platform_client.get_by_id(f'{baseurl}/{path}', _id)
 
         # Request
         assert response.request.url == url
         assert response.request.method == httpretty.GET
+        assert response.request.headers.items() >= headers.items()
 
         # Response
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == body
 
-        self.validate_sent_headers(required_headers, response)
-
-    def test_404_get_by_id(self, server):
+    def test_404_get_by_id(
+        self,
+        baseurl,
+        mock_server,
+        mia_platform_client
+    ):
         """
         Required resource :id no found in the collection
         """
 
-        baseurl, _ = server
-
         _id = 1
-        url = f'{baseurl}/{_id}/'
+        path = 'resources'
+        url = f'{baseurl}/{path}/{_id}'
 
-        httpretty.register_uri(
+        mock_server.register_uri(
             method=httpretty.GET,
             uri=url,
             status=status.HTTP_404_NOT_FOUND,
         )
-
-        mia_platform_client = MiaPlatformClient()
 
         with pytest.raises(
             Exception,
             match=f"Error - MiaPlatformClient GET BY ID {url}"
                 f" respond with status code {status.HTTP_404_NOT_FOUND}"
         ):
-            mia_platform_client.get_by_id(baseurl, _id)
+            mia_platform_client.get_by_id(f'{baseurl}/{path}', _id)
 
-    def test_500_get_by_id(self, server):
+    def test_500_get_by_id(
+        self,
+        baseurl,
+        mock_server,
+        mia_platform_client
+    ):
         """
         Error on retriving the resource :id in the collection
         """
 
-        baseurl, _ = server
-
         _id = 1
-        url = f'{baseurl}/{_id}/'
+        path = 'resources'
+        url = f'{baseurl}/{path}/{_id}'
 
-        httpretty.register_uri(
+        mock_server.register_uri(
             method=httpretty.GET,
             uri=url,
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
-
-        mia_platform_client = MiaPlatformClient()
 
         with pytest.raises(
             Exception,
             match=f"Error - MiaPlatformClient GET BY ID {url}"
                 f" respond with status code {status.HTTP_500_INTERNAL_SERVER_ERROR}"
         ):
-            mia_platform_client.get_by_id(baseurl, _id)
+            mia_platform_client.get_by_id(f'{baseurl}/{path}', _id)
 
     # Count
 
-    def test_200_count(self, server):
+    def test_200_count(
+        self,
+        headers,
+        baseurl,
+        mock_server,
+        mia_platform_client
+    ):
         """
         Sucessfully count the resources in the collection
         """
 
-        baseurl, required_headers = server
+        path = 'resources'
+        url = f'{baseurl}/{path}/count'
+        body = 0
 
-        url = f'{baseurl}/count/'
-        body = '0'
-
-        httpretty.register_uri(
+        mock_server.register_uri(
             method=httpretty.GET,
             uri=url,
             status=status.HTTP_200_OK,
             body=json.dumps(body)
         )
 
-        mia_platform_client = MiaPlatformClient()
-        response = mia_platform_client.count(baseurl)
+        response = mia_platform_client.count(f'{baseurl}/{path}')
 
         # Request
         assert response.request.url == url
         assert response.request.method == httpretty.GET
+        assert response.request.headers.items() >= headers.items()
 
         # Response
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == body
 
-        self.validate_sent_headers(required_headers, response)
-
-    def test_500_count(self, server):
+    def test_500_count(
+        self,
+        baseurl,
+        mock_server,
+        mia_platform_client
+    ):
         """
         Error on counting the resources in the collection
         """
 
-        baseurl, _ = server
+        path = 'resources'
+        url = f'{baseurl}/{path}/count'
+        body = 0
 
-        url = f'{baseurl}/count/'
-        body = '0'
-
-        httpretty.register_uri(
+        mock_server.register_uri(
             method=httpretty.GET,
             uri=url,
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             body=body
         )
 
-        mia_platform_client = MiaPlatformClient()
-
         with pytest.raises(
             Exception,
             match=f"Error - MiaPlatformClient COUNT {url}"
                 f" respond with status code {status.HTTP_500_INTERNAL_SERVER_ERROR}"
         ):
-            mia_platform_client.count(baseurl)
+            mia_platform_client.count(f'{baseurl}/{path}')
 
     # Post
 
-    def test_201_post(self, server):
+    def test_201_post(
+        self,
+        headers,
+        baseurl,
+        mock_server,
+        mia_platform_client
+    ):
         """
         Sucessfully create the resource in the collection
         """
 
-        baseurl, required_headers = server
-
-        url = f'{baseurl}/'
+        path = 'resources'
+        url = f'{baseurl}/{path}'
         body = {'key': 'value'}
 
-        httpretty.register_uri(
+        mock_server.register_uri(
             method=httpretty.POST,
             uri=url,
             status=status.HTTP_201_CREATED,
             body=json.dumps(body)
         )
 
-        mia_platform_client = MiaPlatformClient()
-        response = mia_platform_client.post(baseurl, data=body)
+        response = mia_platform_client.post(url, data=body)
 
         # Request
         assert response.request.url == url
         assert response.request.method == httpretty.POST
+        assert response.request.headers.items() >= headers.items()
 
         # Response
         assert response.status_code == status.HTTP_201_CREATED
         assert response.json() == body
 
-        self.validate_sent_headers(required_headers, response)
-
-    def test_500_post(self, server):
+    def test_500_post(
+        self,
+        baseurl,
+        mock_server,
+        mia_platform_client
+    ):
         """
         Error on creating the resource in the collection
         """
 
-        baseurl, _ = server
-
-        url = f'{baseurl}/'
+        path = 'resources'
+        url = f'{baseurl}/{path}'
         body = {'key': 'value'}
 
-        httpretty.register_uri(
+        mock_server.register_uri(
             method=httpretty.POST,
             uri=url,
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             body=json.dumps(body)
         )
-
-        mia_platform_client = MiaPlatformClient()
 
         with pytest.raises(
             Exception,
@@ -316,84 +357,59 @@ class TestMiaPlatformClient:
 
     # Put
 
-    def test_200_put(self, server):
-        """
-        Sucessfully overwrite the resouce in the collection
-        """
-
-        baseurl, required_headers = server
-
-        url = f'{baseurl}/'
-        body = {'key': 'value'}
-
-        httpretty.register_uri(
-            method=httpretty.PUT,
-            uri=url,
-            status=status.HTTP_200_OK,
-            body=json.dumps(body)
-        )
-
-        mia_platform_client = MiaPlatformClient()
-        response = mia_platform_client.put(baseurl, data=body)
-
-        # Request
-        assert response.request.url == url
-        assert response.request.method == httpretty.PUT
-
-        # Response
-        assert response.status_code == status.HTTP_200_OK
-        assert response.json() == body
-
-        self.validate_sent_headers(required_headers, response)
-
-    def test_201_put(self, server):
+    def test_201_put(
+        self,
+        headers,
+        baseurl,
+        mock_server,
+        mia_platform_client
+    ):
         """
         Sucessfully create the resource in the collection
         """
 
-        baseurl, required_headers = server
-
-        url = f'{baseurl}/'
+        path = 'resources'
+        url = f'{baseurl}/{path}'
         body = {'key': 'value'}
 
-        httpretty.register_uri(
+        mock_server.register_uri(
             method=httpretty.PUT,
             uri=url,
             status=status.HTTP_201_CREATED,
             body=json.dumps(body)
         )
 
-        mia_platform_client = MiaPlatformClient()
-        response = mia_platform_client.put(baseurl, data=body)
+        response = mia_platform_client.put(url, data=body)
 
         # Request
         assert response.request.url == url
         assert response.request.method == httpretty.PUT
+        assert response.request.headers.items() >= headers.items()
 
         # Response
         assert response.status_code == status.HTTP_201_CREATED
         assert response.json() == body
 
-        self.validate_sent_headers(required_headers, response)
-
-    def test_500_put(self, server):
+    def test_500_put(
+        self,
+        baseurl,
+        mock_server,
+        mia_platform_client
+    ):
         """
-        Error on creating / overwriting the resource in the collection
+        Error on creating the resource in the collection
         """
 
-        baseurl, _ = server
-
-        url = f'{baseurl}/'
+        path = 'resources'
+        url = f'{baseurl}/{path}'
         body = {'key': 'value'}
 
-        httpretty.register_uri(
+        mock_server.register_uri(
             method=httpretty.PUT,
             uri=url,
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             body=json.dumps(body)
         )
-
-        mia_platform_client = MiaPlatformClient()
 
         with pytest.raises(
             Exception,
@@ -404,132 +420,148 @@ class TestMiaPlatformClient:
 
     # Patch
 
-    def test_200_patch_by_id(self, server):
+    def test_200_patch_by_id(
+        self,
+        headers,
+        baseurl,
+        mock_server,
+        mia_platform_client
+    ):
         """
         Sucessfully update the resource in the collection
         """
 
-        baseurl, required_headers = server
-
         _id = 1
-        url = f'{baseurl}/{_id}/'
+        path = 'resources'
+        url = f'{baseurl}/{path}/{_id}'
         body = {'key': 'value'}
 
-        httpretty.register_uri(
+        mock_server.register_uri(
             method=httpretty.PATCH,
             uri=url,
             status=status.HTTP_200_OK,
             body=json.dumps(body)
         )
 
-        mia_platform_client = MiaPlatformClient()
-        response = mia_platform_client.patch(baseurl, _id, data=body)
+        response = mia_platform_client.patch(
+            f'{baseurl}/{path}',
+            _id,
+            data=body
+        )
 
         # Request
         assert response.request.url == url
         assert response.request.method == httpretty.PATCH
+        assert response.request.headers.items() >= headers.items()
 
         # Response
         assert response.status_code == status.HTTP_200_OK
         assert response.json() == body
 
-        self.validate_sent_headers(required_headers, response)
-
-    def test_404_patch_by_id(self, server):
+    def test_404_patch_by_id(
+        self,
+        baseurl,
+        mock_server,
+        mia_platform_client
+    ):
         """
         Resource :id to update not found in the collection
         """
 
-        baseurl, _ = server
-
         _id = 1
-        url = f'{baseurl}/{_id}/'
+        path = 'resources'
+        url = f'{baseurl}/{path}/{_id}'
 
-        httpretty.register_uri(
+        mock_server.register_uri(
             method=httpretty.PATCH,
             uri=url,
             status=status.HTTP_404_NOT_FOUND,
         )
-
-        mia_platform_client = MiaPlatformClient()
 
         with pytest.raises(
             Exception,
             match=f"Error - MiaPlatformClient PATCH {url}"
                 f" respond with status code {status.HTTP_404_NOT_FOUND}"
         ):
-            mia_platform_client.patch(baseurl, _id)
+            mia_platform_client.patch(f'{baseurl}/{path}', _id)
 
-    def test_500_patch_by_id(self, server):
+    def test_500_patch_by_id(
+        self,
+        baseurl,
+        mock_server,
+        mia_platform_client
+    ):
         """
         Error on updating the resource :id in the collection
         """
 
-        baseurl, _ = server
-
         _id = 1
-        url = f'{baseurl}/{_id}/'
+        path = 'resources'
+        url = f'{baseurl}/{path}/{_id}'
 
-        httpretty.register_uri(
+        mock_server.register_uri(
             method=httpretty.PATCH,
             uri=url,
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
-
-        mia_platform_client = MiaPlatformClient()
 
         with pytest.raises(
             Exception,
             match=f"Error - MiaPlatformClient PATCH {url}"
                 f" respond with status code {status.HTTP_500_INTERNAL_SERVER_ERROR}"
         ):
-            mia_platform_client.patch(baseurl, _id)
+            mia_platform_client.patch(f'{baseurl}/{path}', _id)
 
     # Delete
 
-    def test_204_delete(self, server):
+    def test_204_delete(
+        self,
+        headers,
+        baseurl,
+        mock_server,
+        mia_platform_client
+    ):
         """
         Sucessfully delete the resources from collection
         """
 
-        baseurl, required_headers = server
+        path = 'resources'
+        url = f'{baseurl}/{path}'
 
-        url = f'{baseurl}/'
-
-        httpretty.register_uri(
+        mock_server.register_uri(
             method=httpretty.DELETE,
             uri=url,
             status=status.HTTP_204_NO_CONTENT,
         )
 
-        mia_platform_client = MiaPlatformClient()
         response = mia_platform_client.delete(url)
 
         # Request
         assert response.request.url == url
         assert response.request.method == httpretty.DELETE
+        assert response.request.headers.items() >= headers.items()
 
         # Response
         assert response.status_code == status.HTTP_204_NO_CONTENT
 
-        self.validate_sent_headers(required_headers, response)
-
-    def test_500_delete(self, server):
+    def test_500_delete(
+        self,
+        baseurl,
+        mock_server,
+        mia_platform_client
+    ):
         """
         Error on deleting the resources from the collection
         """
 
-        baseurl, _ = server
+        path = 'resources'
+        url = f'{baseurl}/{path}'
 
-        url = f'{baseurl}/'
-
-        httpretty.register_uri(
+        mock_server.register_uri(
             method=httpretty.DELETE,
             uri=url,
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
-
-        mia_platform_client = MiaPlatformClient()
 
         with pytest.raises(
             Exception,
@@ -540,80 +572,87 @@ class TestMiaPlatformClient:
 
     # Delete by id
 
-    def test_204_delete_by_id(self, server):
+    def test_204_delete_by_id(
+        self,
+        headers,
+        baseurl,
+        mock_server,
+        mia_platform_client
+    ):
         """
         Sucessfully delete the resource :id from the collection
         """
 
-        baseurl, required_headers = server
-
         _id = 1
-        url = f'{baseurl}/{_id}/'
+        path = 'resources'
+        url = f'{baseurl}/{path}/{_id}'
 
-        httpretty.register_uri(
+        mock_server.register_uri(
             method=httpretty.DELETE,
             uri=url,
             status=status.HTTP_204_NO_CONTENT,
         )
 
-        mia_platform_client = MiaPlatformClient()
-        response = mia_platform_client.delete_by_id(baseurl, _id)
+        response = mia_platform_client.delete_by_id(f'{baseurl}/{path}', _id)
 
         # Request
         assert response.request.url == url
         assert response.request.method == httpretty.DELETE
+        assert response.request.headers.items() >= headers.items()
 
         # Response
         assert response.status_code == status.HTTP_204_NO_CONTENT
 
-        self.validate_sent_headers(required_headers, response)
-
-    def test_404_delete_by_id(self, server):
+    def test_404_delete_by_id(
+        self,
+        baseurl,
+        mock_server,
+        mia_platform_client
+    ):
         """
         Resource :id to delete not found in the collection
         """
 
-        baseurl, _ = server
-
         _id = 1
-        url = f'{baseurl}/{_id}/'
+        path = 'resources'
+        url = f'{baseurl}/{path}/{_id}'
 
-        httpretty.register_uri(
+        mock_server.register_uri(
             method=httpretty.DELETE,
             uri=url,
             status=status.HTTP_404_NOT_FOUND,
         )
-
-        mia_platform_client = MiaPlatformClient()
 
         with pytest.raises(
             Exception,
             match=f"Error - MiaPlatformClient DELETE BY ID {url}"
                 f" respond with status code {status.HTTP_404_NOT_FOUND}"
         ):
-            mia_platform_client.delete_by_id(baseurl, _id)
+            mia_platform_client.delete_by_id(f'{baseurl}/{path}', _id)
 
-    def test_500_delete_by_id(self, server):
+    def test_500_delete_by_id(
+        self,
+        baseurl,
+        mock_server,
+        mia_platform_client
+    ):
         """
         Error on deleting the resource :id from the collection
         """
 
-        baseurl, _ = server
-
         _id = 1
-        url = f'{baseurl}/{_id}/'
+        path = 'resources'
+        url = f'{baseurl}/{path}/{_id}'
 
-        httpretty.register_uri(
+        mock_server.register_uri(
             method=httpretty.DELETE,
             uri=url,
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
         )
-
-        mia_platform_client = MiaPlatformClient()
 
         with pytest.raises(
             Exception,
             match=f"Error - MiaPlatformClient DELETE BY ID {url}"
                 f" respond with status code {status.HTTP_500_INTERNAL_SERVER_ERROR}"
         ):
-            mia_platform_client.delete_by_id(baseurl, _id)
+            mia_platform_client.delete_by_id(f'{baseurl}/{path}', _id)
