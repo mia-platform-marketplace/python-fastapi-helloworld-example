@@ -34,8 +34,7 @@ deactivate
 During development, you will probably have to perform the same operations many
 times: start the application locally, check the code quality, run tests and compute coverage. Therefore,
 to avoid to remember each time the syntax of the commands to be executed, the
-main commands were collected in a Makefile. [Makefile](https://www.gnu.org/software/make/manual/make.html) is a Unix automation tool
-that contains the recipe to build and run your program. So, listed below are the
+main commands were collected in a Makefile. [Makefile](https://www.gnu.org/software/make/manual/make.html) is a Unix automation tool that contains the recipe to build and run your program. So, listed below are the
 commands that can be executed by the make command:
 
 Install requirements and pre-commit:
@@ -62,6 +61,16 @@ Compute the coverage:
 ```shell
 make coverage
 ```
+
+## Utilities
+
+### MiaPlatformClient
+
+The `MiaPlatformClient` class simplifies HTTP requests within a Mia Platform application cluster. It uses the requests library for common operations like `GET`, `POST`, `PUT`, `PATCH`, and `DELETE` on resource URLs. Designed for the Mia Platform environment, it supports activity logging with a specified logger. The `MiaPlatformAuth` class extends `requests.auth.AuthBase`, enabling the addition of specified HTTP headers to requests via the `MiaPlatformClient` instance. These headers are extracted from the provided object for seamless header proxying. The `HEADER_KEYS_TO_PROXY` env variable facilitates specifying headers for forwarding, providing customizable control over header forwarding behavior to suit individual needs.
+
+### MockServer
+
+`MockServer` is a purpose-built utility to effortlessly emulate external services, enhancing testing efficiency. It creates mock servers to replicate real-world behavior, simplifying the simulation of external services. Managed by the mocking library HTTPretty, it allows the registration of preset URIs linked to specific HTTP methods and their expected responses. As a pytest fixture named `mock_server`, this tool facilitates smooth test execution.
 
 ---
 
