@@ -4,7 +4,11 @@ import requests
 
 class MiaPlatformAuth(requests.auth.AuthBase):
     """
-    Attaches http headers to the given request object
+    Attaches HTTP headers to the given request object for Mia Platform authentication.
+        
+    Args:
+        headers (dict): A dictionary containing the headers to be attached to the request.
+        logger: A logger object.
     """
 
     def __init__(self, headers, logger):
@@ -31,8 +35,11 @@ class MiaPlatformAuth(requests.auth.AuthBase):
 
 class MiaPlatformClient():
     """
-    Provides a simple interface to do http requests within a Mia Platform
-    application cluster
+    Provides a simple interface to make HTTP requests within a Mia Platform application cluster.
+
+    Args:
+        headers (dict): A dictionary containing the headers to be used for authentication.
+        logger: A logger object.
     """
 
     def __init__(self, headers, logger):

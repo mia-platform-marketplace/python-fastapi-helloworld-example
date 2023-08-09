@@ -34,8 +34,7 @@ deactivate
 During development, you will probably have to perform the same operations many
 times: start the application locally, check the code quality, run tests and compute coverage. Therefore,
 to avoid to remember each time the syntax of the commands to be executed, the
-main commands were collected in a Makefile. [Makefile](https://www.gnu.org/software/make/manual/make.html) is a Unix automation tool
-that contains the recipe to build and run your program. So, listed below are the
+main commands were collected in a Makefile. [Makefile](https://www.gnu.org/software/make/manual/make.html) is a Unix automation tool that contains the recipe to build and run your program. So, listed below are the
 commands that can be executed by the make command:
 
 Install requirements and pre-commit:
@@ -61,6 +60,85 @@ make test
 Compute the coverage:
 ```shell
 make coverage
+```
+
+## Utilities
+
+### MiaPlatformClient
+
+The `MiaPlatformClient` class simplifies HTTP requests within a Mia Platform application cluster. It uses the requests library for common operations like `GET`, `POST`, `PUT`, `PATCH`, and `DELETE` on resource URLs. Designed for the Mia Platform environment, it supports activity logging with a specified logger. The `MiaPlatformAuth` class extends `requests.auth.AuthBase`, enabling the addition of specified HTTP headers to requests via the `MiaPlatformClient` instance. These headers are extracted from the provided object for seamless header proxying. The `HEADER_KEYS_TO_PROXY` env variable facilitates specifying headers for forwarding, providing customizable control over header forwarding behavior to suit individual needs.
+
+These examples show how to use the MiaPlatformClient lib.
+
+Usage example in a generic function:
+
+```python
+from src.utils.logger import logger
+
+def dummy():
+    # Define headers for authentication
+    headers = {
+      'key': 'value'
+    }
+
+    # Create a MiaPlatformClient instance with the defined headers and imported logger
+    mia_platform_client = MiaPlatformClient(headers, logger)
+```
+
+Usage example within an endpoint handler:
+
+```python
+@router.get("/")
+def dummy(request: Request):
+    # Get the Mia Platform client instance from the request's state
+    mia_platform_client = request.state.mia_platform_client
+
+    # Make a standard request using the Mia Platform client
+    response = mia_platform_client.get(url)
+
+    # Alternatively, make a request with extra headers
+    response = mia_platform_client.get(url, headers)
+
+    # Return the JSON content of the response
+    return response.json()
+```
+
+### MockServer
+
+`MockServer` is a purpose-built utility to effortlessly emulate external services, enhancing testing efficiency. It creates mock servers to replicate real-world behavior, simplifying the simulation of external services. Managed by the mocking library HTTPretty, it allows the registration of preset URIs linked to specific HTTP methods and their expected responses. As a pytest fixture named `mock_server`, this tool facilitates smooth test execution.
+
+The following example show how to use the MockServer test utility.
+
+```python
+# Note: we are using the mock_server fixture, which automatically creates an instance of the MockServer class and enables/disables the server as needed
+
+def dummy(
+    baseurl,
+    mock_server,
+    mia_platform_client
+):
+    # Define the resource path
+    path = 'resources'
+    
+    # Construct the complete URL
+    url = f'{baseurl}/{path}'
+    
+    # Prepare a sample response body
+    body = [{'message': 'Hi :)'}]
+
+    # Register a new mock endpoint
+    mock_server.register_uri(
+        method=httpretty.GET,
+        uri=url,
+        status=status.HTTP_200_OK,
+        body=json.dumps(body)
+    )
+
+    # Make a request using the Mia Platform client
+    response = mia_platform_client.get(url)
+
+    # Assertions
+    # ...
 ```
 
 ---
