@@ -10,7 +10,7 @@ router = APIRouter()
     "/-/check-up",
     response_model=StatusOkResponseSchema,
     status_code=status.HTTP_200_OK,
-    tags=["Check-up"]
+    tags=["python-fastapi-template"]
 )
 async def readiness():
     """

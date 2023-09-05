@@ -10,7 +10,7 @@ router = APIRouter()
     "/",
     response_model=MessageResponseSchema,
     status_code=status.HTTP_200_OK,
-    tags=["Hello World"]
+    tags=["python-fastapi-template"]
 )
 async def hello_world(request: Request):
     """
