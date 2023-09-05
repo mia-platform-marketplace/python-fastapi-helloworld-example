@@ -37,5 +37,6 @@ if __name__ == '__main__':
     uvicorn.run(
         app,
         host='0.0.0.0',
-        port=int(os.environ.get('HTTP_PORT', 3000))
+        port=int(os.environ.get('HTTP_PORT', 3000)),
+        log_config=None
     )

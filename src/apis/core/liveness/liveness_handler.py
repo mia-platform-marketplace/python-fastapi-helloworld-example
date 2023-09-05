@@ -10,7 +10,7 @@ router = APIRouter()
     "/-/healthz",
     response_model=StatusOkResponseSchema,
     status_code=status.HTTP_200_OK,
-    tags=["Liveness"]
+    tags=["python-fastapi-template"]
 )
 async def liveness():
     """

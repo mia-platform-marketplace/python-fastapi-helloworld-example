@@ -1,7 +1,10 @@
 import os
 import sys
 import logging
+from dotenv import load_dotenv
 
+
+load_dotenv('default.env')
 
 # Stop uvicorn log propagation otherwise we would have duplicate logs
 uvicorn_logger = logging.getLogger("uvicorn")
