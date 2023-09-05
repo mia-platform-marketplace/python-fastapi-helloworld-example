@@ -22,7 +22,7 @@ class MiaPlatformAuth(requests.auth.AuthBase):
             try:
                 self.headers_to_proxy[header_key] = headers[header_key]
             except KeyError:
-                logger.warning(
+                logger.debug(
                     f'The parameter "{header_key}" is missing from the request headers'
                 )
 
