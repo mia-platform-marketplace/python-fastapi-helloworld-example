@@ -73,13 +73,15 @@ These examples show how to use the MiaPlatformClient lib.
 Usage example in a generic function:
 
 ```python
-from src.utils.logger import logger
+from src.utils.logger import get_logger
 
 def dummy():
     # Define headers for authentication
     headers = {
       'key': 'value'
     }
+
+    logger = get_logger()
 
     # Create a MiaPlatformClient instance with the defined headers and imported logger
     mia_platform_client = MiaPlatformClient(headers, logger)

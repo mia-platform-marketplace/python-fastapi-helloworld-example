@@ -3,9 +3,9 @@ import pytest
 import httpretty
 from fastapi import status
 
-from src.utils.logger import logger
 from src.schemas.header_schema import HeaderSchema
 from src.lib.mia_platform_client import MiaPlatformClient
+from src.utils.logger import get_logger
 
 
 @pytest.fixture(name='headers')
@@ -23,6 +23,7 @@ def fixture_baseurl():
 
 @pytest.fixture(name='mia_platform_client')
 def fixture_mia_platform_client(headers):
+    logger = get_logger()
     mia_platform_client = MiaPlatformClient(headers, logger)
     yield mia_platform_client
 
