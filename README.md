@@ -17,6 +17,12 @@ To develop the service locally you need:
 A virtual environment is a Python tool for dependency management and project
 isolation. For further info about the creation and management of a virtual environment,
 please check the [Python official documentation](https://docs.python.org/3/library/venv.html).
+To create your virtual environment run the following command:
+
+```shell
+python -m venv /path/to/new/virtual/environment
+```
+
 To activate your virtual envirorment run the following command on
 your terminal:
 
@@ -30,6 +36,8 @@ command:
 ```shell
 deactivate
 ```
+
+Remember to put the path to the virtual environment in the `.gitignore` file.
 
 During development, you will probably have to perform the same operations many
 times: start the application locally, check the code quality, run tests and compute coverage. Therefore,
